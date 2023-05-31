@@ -1,0 +1,13 @@
+server:
+  # 端口
+  port: 8088
+ark: #方舟相关配置
+  log:
+    dir: 'D:\test\'
+    file: 'log'
+  notice:
+    groupId: '637485030' # 群组ID
+qq: #qq相关配置
+  ip: 127.0.0.1
+  httpPort: 5700
+  webSocketPort: 8080
