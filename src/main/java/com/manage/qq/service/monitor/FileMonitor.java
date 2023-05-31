@@ -111,6 +111,9 @@ public class FileMonitor {
             File[] files = dir.listFiles();
             if (files != null) {
                 for (File file : files) {
+                    if (!file.getName().contains(fileName)) {
+                        continue;
+                    }
                     if (!fileTailerMap.containsKey(file.getAbsolutePath())) {
                         Tailer tailer = new Tailer(file, myTailerListener, 1000, true);
                         executor.submit(tailer);
