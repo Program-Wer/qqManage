@@ -1,0 +1,1 @@
+java -Dfile.encoding=UTF-8 -jar qq-manage-1.0.jar

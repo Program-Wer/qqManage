@@ -8,7 +8,11 @@ public class TextUtil {
         if (StringUtils.isEmpty(text)) {
             return null;
         }
-        return "方舟服务器发来捷豹：【" + removeBrackets(removeTime(removeBracketsAndContent(text))) + "】";
+        String handleText = removeBlankLine(removeBrackets(removeTime(removeBracketsAndContent(text))));
+        if (StringUtils.isBlank(handleText)) {
+            return null;
+        }
+        return "方舟服务器发来捷豹：【" + handleText + "】";
     }
 
     public static String removeBracketsAndContent(String text) {
@@ -23,6 +27,11 @@ public class TextUtil {
 
     public static String removeBrackets(String text) {
         String regex = "\\(|\\)|（|）";
+        return text.replaceAll(regex, "");
+    }
+
+    public static String removeBlankLine(String text) {
+        String regex = "\\n";
         return text.replaceAll(regex, "");
     }
 
