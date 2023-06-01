@@ -18,7 +18,7 @@ public class ConfigInitService {
     private ResourceLoader resourceLoader;
     @PostConstruct
     public void init() {
-//        copyResourcesToCurrentDirectory();
+        copyResourcesToCurrentDirectory();
     }
 
     /**
@@ -27,11 +27,12 @@ public class ConfigInitService {
     public void copyResourcesToCurrentDirectory() {
         String appPath = System.getProperty("user.dir");
         try {
-            Resource[] resources = new PathMatchingResourcePatternResolver().getResources("classpath*:/*");
+            Resource[] resources = new PathMatchingResourcePatternResolver().getResources("classpath:/init/*");
             for (Resource resource : resources) {
                 String fileName = resource.getFilename();
                 File file = new File(appPath + File.separator + fileName);
                 if (!file.exists()) {
+                    System.out.println("初始化文件配置：" + fileName);
                     InputStream inputStream = resource.getInputStream();
                     OutputStream outputStream = new FileOutputStream(file);
                     byte[] buffer = new byte[1024];
