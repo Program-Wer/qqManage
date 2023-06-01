@@ -1,7 +1,7 @@
 package com.manage.qq.ark;
 
 import com.manage.qq.config.Config;
-import com.manage.qq.gateway.QQGateway;
+import com.manage.qq.mq.QQMqHandler;
 import com.manage.qq.service.monitor.FileMonitor;
 import com.manage.qq.service.monitor.MyTailerListener;
 import org.apache.commons.lang3.StringUtils;
@@ -16,7 +16,7 @@ public class ArkLogMonitor {
     @Resource
     private Config config;
     @Resource
-    private QQGateway qqGateway;
+    private QQMqHandler qqMqHandler;
 
     @PostConstruct
     public void openMonitor() {
@@ -25,7 +25,7 @@ public class ArkLogMonitor {
             if (StringUtils.isBlank(text)) {
                 return;
             }
-            qqGateway.sendGroupMsg(text, config.getArkNoticeGroupId());
+            qqMqHandler.push(config.getArkNoticeGroupId(), text);
         });
         new FileMonitor(config.getArkLogDir(), config.getArkLogFile(), myTailerListener).start();
     }

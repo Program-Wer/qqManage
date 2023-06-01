@@ -19,4 +19,6 @@ public class Config {
     private String qqHttpPort;
     @Value("${qq.webSocketPort}")
     private String qqWebSocketPort;
+    @Value("${qq.groupPeriod}")
+    private Long qqGroupPeriod;
 }

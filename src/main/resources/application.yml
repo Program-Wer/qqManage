@@ -18,3 +18,4 @@ qq: #qq相关配置
   ip: 127.0.0.1
   httpPort: 5700
   webSocketPort: 8080
+  groupPeriod: 10 # 群组消息定时发送
