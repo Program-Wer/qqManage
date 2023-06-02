@@ -12,7 +12,7 @@ public class TextUtil {
         if (StringUtils.isBlank(handleText)) {
             return null;
         }
-        return "方舟服务器发来捷豹：【" + handleText + "】";
+        return handleText;
     }
 
     public static String removeBracketsAndContent(String text) {

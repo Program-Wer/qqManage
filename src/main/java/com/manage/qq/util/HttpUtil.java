@@ -43,14 +43,16 @@ public class HttpUtil {
 
     public static void main(String[] args) {
         Map<String, String> map = new HashMap<>();
-        map.put("user_id", "1367112248");
-        map.put("message", "你好~");
-        String s = sendGet("http://127.0.0.1:5700/send_private_msg", map);
+        map.put("user_id", "1695807914");
+        map.put("message", "[CQ:tts,text=你在干什么？]");
+        String s = null;
+//         s = sendGet("http://127.0.0.1:5700/send_private_msg", map);
         System.out.println(s);
         map = new HashMap<>();
         map.put("group_id", "637485030");
-        map.put("message", "你好");
-        String s1 = sendGet("http://127.0.0.1:5700/send_group_msg", map);
-        System.out.println(s1);
+//        map.put("message", "[CQ:tts,text=老油条，你这个傻逼？]");
+        map.put("message", "123[CQ:image,file=file:/D:/software/cqhttp/data/images/1.png]");
+        s = sendGet("http://127.0.0.1:5700/send_group_msg", map);
+        System.out.println(s);
     }
 }

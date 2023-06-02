@@ -14,6 +14,8 @@ ark: #方舟相关配置
     file: 'log'
   notice:
     groupId: '637485030' # 群组ID
+    combineLine: 3 # 合并发送的消息条数
+
 qq: #qq相关配置
   ip: 127.0.0.1
   httpPort: 5700

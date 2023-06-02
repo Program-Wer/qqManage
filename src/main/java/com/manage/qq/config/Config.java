@@ -13,6 +13,8 @@ public class Config {
     private String arkLogDir;
     @Value("${ark.log.file}")
     private String arkLogFile;
+    @Value("${ark.notice.combineLine}")
+    private Long arkNoticeCombineLine;
     @Value("${qq.ip}")
     private String qqIp;
     @Value("${qq.httpPort}")
