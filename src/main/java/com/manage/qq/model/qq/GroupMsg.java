@@ -1,4 +1,4 @@
-package com.manage.qq.model;
+package com.manage.qq.model.qq;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -3,7 +3,7 @@ package com.manage.qq.mq;
 import com.manage.qq.config.Config;
 import com.manage.qq.enums.CQEnum;
 import com.manage.qq.gateway.QQGateway;
-import com.manage.qq.model.GroupMsg;
+import com.manage.qq.model.qq.GroupMsg;
 import com.manage.qq.util.FileUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
-public class QQMqHandler {
+public class QQInnerMqHandler {
     @Resource
     private Config config;
     @Resource

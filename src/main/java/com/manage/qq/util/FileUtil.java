@@ -72,4 +72,24 @@ public class FileUtil {
             e.printStackTrace();
         }
     }
+
+    public static String getDir(String path) {
+        try {
+            return new File(path).getParent();
+        } catch (Exception e) {
+            System.out.println("获取目录出错：");
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static String getFileName(String path) {
+        try {
+            return new File(path).getName();
+        } catch (Exception e) {
+            System.out.println("获取目录出错：");
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

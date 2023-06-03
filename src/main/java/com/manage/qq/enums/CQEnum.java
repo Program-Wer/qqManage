@@ -7,6 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum CQEnum {
     IMAGE("[CQ:image,file=%s]"),
+    AT("[CQ:at,qq=%s]"),
     ;
     private String sendFormat;
 }

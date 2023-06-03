@@ -17,10 +17,16 @@ public class Config {
     private Long arkNoticeCombineLine;
     @Value("${qq.ip}")
     private String qqIp;
+    @Value("${qq.number}")
+    private String qqNumber;
     @Value("${qq.httpPort}")
     private String qqHttpPort;
     @Value("${qq.webSocketPort}")
     private String qqWebSocketPort;
     @Value("${qq.groupPeriod}")
     private Long qqGroupPeriod;
+    @Value("${n2n.run}")
+    private String n2nRun;
+    @Value("${n2n.name}")
+    private String n2nName;
 }

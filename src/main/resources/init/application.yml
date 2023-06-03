@@ -14,10 +14,13 @@ ark: #方舟相关配置
     file: 'log'
   notice:
     groupId: '637485030' # 群组ID
-    combineLine: 3 # 合并发送的消息条数
-
+    combineLine: 6 # 合并发送的消息条数
+n2n:
+  run: 'D:\software\EasyN2N\n2n_client\x64\connect.bat'#运行脚本的位置
+  name: 'edge_v3_bugxia_n2n.exe'#应用程序名称
 qq: #qq相关配置
+  number: '1684661146'
   ip: 127.0.0.1
   httpPort: 5700
   webSocketPort: 8080
-  groupPeriod: 10 # 群组消息定时发送
+  groupPeriod: 60 # 群组消息定时发送
