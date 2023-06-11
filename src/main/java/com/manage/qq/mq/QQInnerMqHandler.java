@@ -64,6 +64,6 @@ public class QQInnerMqHandler {
     }
 
     public void push(String groupId, String msg) {
-        groupMsgs.push(new GroupMsg(groupId, msg));
+        groupMsgs.add(new GroupMsg(groupId, msg));
     }
 }
