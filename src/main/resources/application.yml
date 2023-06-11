@@ -12,6 +12,8 @@ ark: #方舟相关配置
   log:
     dir: 'D:\test\'
     file: 'log'
+  run: 'E:\ARK\steamCMD\Servers\Server2\ShooterGame\Saved\Config\WindowsServer\RunServer.cmd'
+  name: 'ShooterGameServer.exe'
   notice:
     groupId: '637485030' # 群组ID
     combineLine: 6 # 合并发送的消息条数

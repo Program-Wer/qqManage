@@ -13,6 +13,10 @@ public class Config {
     private String arkLogDir;
     @Value("${ark.log.file}")
     private String arkLogFile;
+    @Value("${ark.run}")
+    private String arkRun;
+    @Value("${ark.name}")
+    private String arkName;
     @Value("${ark.notice.combineLine}")
     private Long arkNoticeCombineLine;
     @Value("${qq.ip}")

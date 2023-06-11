@@ -37,7 +37,7 @@ public class QQInnerMqHandler {
 
                 ArrayList<GroupMsg> msgList = new ArrayList<>();
                 while (!groupMsgs.isEmpty()) {
-                    msgList.add(groupMsgs.pop());
+                    msgList.add(groupMsgs.pollFirst());
                 }
 
                 msgList.stream().filter(Objects::nonNull)

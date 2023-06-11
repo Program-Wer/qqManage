@@ -50,8 +50,8 @@ public class HttpUtil {
         System.out.println(s);
         map = new HashMap<>();
         map.put("group_id", "637485030");
-//        map.put("message", "[CQ:tts,text=老油条，你这个傻逼？]");
-        map.put("message", "123[CQ:image,file=file:/D:/software/cqhttp/data/images/1.png]");
+        map.put("message", "[CQ:tts,text=老油条，你这个傻逼？]");
+//        map.put("message", "123[CQ:image,file=file:/D:/software/cqhttp/data/images/1.png]");
         s = sendGet("http://127.0.0.1:5700/send_group_msg", map);
         System.out.println(s);
     }

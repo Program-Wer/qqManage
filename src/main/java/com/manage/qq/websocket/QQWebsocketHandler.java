@@ -2,6 +2,7 @@ package com.manage.qq.websocket;
 
 import com.manage.qq.config.Config;
 import com.manage.qq.enums.CQEnum;
+import com.manage.qq.gateway.ArkGateway;
 import com.manage.qq.gateway.N2NGateway;
 import com.manage.qq.gateway.QQGateway;
 import com.manage.qq.model.qq.QQWsMessage;
@@ -23,6 +24,8 @@ public class QQWebsocketHandler extends TextWebSocketHandler {
     private QQGateway qqGateway;
     @Resource
     private N2NGateway n2NGateway;
+    @Resource
+    private ArkGateway arkGateway;
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
@@ -55,6 +58,13 @@ public class QQWebsocketHandler extends TextWebSocketHandler {
                 case "关闭n2n":
                     boolean close = n2NGateway.close();
                     qqGateway.sendGroupMsg(close ? "n2n被成功关闭" : "n2n关闭失败", config.getArkNoticeGroupId());
+                    break;
+                case "重启方舟":
+
+                    break;
+                case "查看方舟":
+                    break;
+                case "关闭方舟":
                     break;
                 default:
                     qqGateway.sendGroupMsg("老毕登，👴听不懂你讲话", config.getArkNoticeGroupId());
