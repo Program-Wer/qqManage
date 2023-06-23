@@ -3,8 +3,9 @@ package com.manage.qq.mq;
 import com.manage.qq.config.Config;
 import com.manage.qq.enums.CQEnum;
 import com.manage.qq.gateway.QQGateway;
-import com.manage.qq.model.qq.GroupMsg;
+import com.manage.qq.model.qq.MsgSendContext;
 import com.manage.qq.util.FileUtil;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -24,7 +25,7 @@ public class QQInnerMqHandler {
     @Resource
     private QQGateway qqGateway;
 
-    private final static ConcurrentLinkedDeque<GroupMsg> groupMsgs = new ConcurrentLinkedDeque<>();
+    private final static ConcurrentLinkedDeque<MsgSendContext> groupMsgs = new ConcurrentLinkedDeque<>();
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1);
 
     @PostConstruct
@@ -35,24 +36,26 @@ public class QQInnerMqHandler {
                     return;
                 }
 
-                ArrayList<GroupMsg> msgList = new ArrayList<>();
+                ArrayList<MsgSendContext> msgList = new ArrayList<>();
                 while (!groupMsgs.isEmpty()) {
                     msgList.add(groupMsgs.pollFirst());
                 }
 
                 msgList.stream().filter(Objects::nonNull)
-                        .collect(Collectors.groupingBy(GroupMsg::getGroupId))
-                        .forEach((groupId, sameIdMsgs) -> {
+                        .collect(Collectors.groupingBy(context -> ImmutablePair.of(context.getGroupId(), context.getUserId())))
+                        .forEach((pair, sameIdMsgs) -> {
+                            String groupId = pair.getLeft();
+                            String privateId = pair.getRight();
                             int[] i = new int[]{1};
                             String title = "【方舟捷豹通知】";
                             String combineMsg = sameIdMsgs.stream().map(msg -> String.format("【%s】%s", i[0]++, msg.getMsg())).collect(Collectors.joining("\n"));
                             if (msgList.size() <= config.getArkNoticeCombineLine()) {
-                                qqGateway.sendGroupMsg(title + "\n" + combineMsg, groupId);
+                                qqGateway.sendMsg(title + "\n" + combineMsg, groupId, privateId);
                             } else {
                                 String textImageFilePath = FileUtil.genUniqueFileNameContainsPath("textImage", ".png");
                                 FileUtil.textToImage(combineMsg, textImageFilePath);
                                 String uriPath = FileUtil.convertUriPath(textImageFilePath);
-                                qqGateway.sendGroupMsg(title + String.format(CQEnum.IMAGE.getSendFormat(), uriPath), groupId);
+                                qqGateway.sendMsg(title + String.format(CQEnum.IMAGE.getSendFormat(), uriPath), groupId, privateId);
                             }
                         });
             } catch (Throwable e) {
@@ -63,7 +66,7 @@ public class QQInnerMqHandler {
         }, 0, config.getQqGroupPeriod(), TimeUnit.SECONDS);
     }
 
-    public void push(String groupId, String msg) {
-        groupMsgs.add(new GroupMsg(groupId, msg));
+    public void push(String groupId, String userId, String msg) {
+        groupMsgs.add(new MsgSendContext(groupId, userId, msg));
     }
 }

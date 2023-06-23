@@ -1,6 +1,7 @@
 package com.manage.qq.ark;
 
 import com.manage.qq.config.Config;
+import com.manage.qq.dao.json.PrivateSubscriptionDAO;
 import com.manage.qq.mq.QQInnerMqHandler;
 import com.manage.qq.service.monitor.FileMonitor;
 import com.manage.qq.service.monitor.MyTailerListener;
@@ -17,6 +18,8 @@ public class ArkLogMonitor {
     private Config config;
     @Resource
     private QQInnerMqHandler qqMqHandler;
+    @Resource
+    private PrivateSubscriptionDAO privateSubscriptionDAO;
 
     @PostConstruct
     public void openMonitor() {
@@ -25,7 +28,10 @@ public class ArkLogMonitor {
             if (StringUtils.isBlank(text)) {
                 return;
             }
-            qqMqHandler.push(config.getArkNoticeGroupId(), text);
+            qqMqHandler.push(config.getArkNoticeGroupId(), null, text);
+            for (String privateSubscriptionId : privateSubscriptionDAO.read()) {
+                qqMqHandler.push(null, privateSubscriptionId, text);
+            }
         });
         new FileMonitor(config.getArkLogDir(), config.getArkLogFile(), myTailerListener).start();
     }

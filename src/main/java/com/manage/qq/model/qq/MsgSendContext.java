@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GroupMsg {
+public class MsgSendContext {
     private String groupId;
+    private String userId;
     private String msg;
 }
