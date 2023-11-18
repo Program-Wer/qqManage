@@ -1,64 +1,77 @@
 package com.manage.qq.util;
 
 import com.manage.qq.model.SystemTask;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class SystemUtil {
+    static Charset cmdCharset = Charset.forName("GBK");
     public static void main(String[] args) {
-        killProcess("edge_v3_bugxia_n2n.exe");
-//        System.out.println(runBat("D:\\software\\EasyN2N\\n2n_client\\x64\\connect.bat"));
-        System.out.println(run("cmd /k cd D:\\software\\EasyN2N\\n2n_client\\x64 && connect.bat"));
-        for (String s : "========================= ======== ================ =========== ============".split(" ")) {
-            System.out.println(s.length());
-        }
-        System.out.println(getTaskList());
+        System.out.println(runAndReturn("tasklist"));
     }
 
-    public static Pair<Boolean, String> run(String task) {
-        StringBuilder stringBuilder = new StringBuilder();
-        boolean runSuccess = true;
+
+//        killProcess("edge_v3_bugxia_n2n.exe");
+////        logger.info(runBat("D:\\software\\EasyN2N\\n2n_client\\x64\\connect.bat"));
+////        log.info(run("cmd /k cd D:\\software\\EasyN2N\\n2n_client\\x64 && connect.bat"));
+//        for (String s : "========================= ======== ================ =========== ============".split(" ")) {
+//            log.info(String.valueOf(s.length()));
+//        }
+//        log.info(String.valueOf(getTaskList()));
+
+    public static void run(String task) {
         try {
-            Process process = Runtime.getRuntime().exec(task);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), Charset.forName("GBK")));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line);
-                stringBuilder.append("\n");
-            }
-            reader.close();
-            process.destroy();
-        } catch (Throwable e) {
-            System.out.println("执行命令时出错：");
-            e.printStackTrace();
-            runSuccess = false;
+            CommandLine commandLine = CommandLine.parse(task);
+            DefaultExecutor executor = new DefaultExecutor();
+            executor.setStreamHandler(new PumpStreamHandler(System.out, System.err));
+            executor.execute(commandLine);
+        } catch (Exception e) {
+            log.error("执行命令时出错： task:{}", JsonUtil.toJson(task), e);
         }
-        return ImmutablePair.of(runSuccess, stringBuilder.toString());
     }
 
-    public static Boolean runNoRead(String task) {
-        boolean runSuccess = true;
+    public static String runAndReturn(String task) {
         try {
-            Runtime.getRuntime().exec(task);
-        } catch (Throwable e) {
-            System.out.println("执行命令时出错：");
-            e.printStackTrace();
-            runSuccess = false;
+            CommandLine commandLine = CommandLine.parse(task);
+            DefaultExecutor executor = new DefaultExecutor();
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
+            executor.setStreamHandler(streamHandler);
+            executor.execute(commandLine);
+
+            return outputStream.toString(cmdCharset.name());
+        } catch (Exception e) {
+            log.error("执行命令时出错： task:{}", JsonUtil.toJson(task), e);
         }
-        return runSuccess;
+        return null;
     }
 
-    public static Boolean runBat(String batPath) {
+    public static boolean runNoRead(String task) {
+        try {
+            CommandLine commandLine = CommandLine.parse(task);
+            DefaultExecutor executor = new DefaultExecutor();
+            executor.execute(commandLine);
+            return true;
+        } catch (Exception e) {
+            log.error("执行命令时出错： task:{}", JsonUtil.toJson(task), e);
+        }
+        return false;
+    }
+
+    public static boolean runBat(String batPath) {
         String dir = FileUtil.getDir(batPath);
         String fileName = FileUtil.getFileName(batPath);
         if (dir == null || fileName == null) {
@@ -69,7 +82,14 @@ public class SystemUtil {
 
     public static List<SystemTask> getTaskList() {
         try {
-            String taskStr = run("tasklist").getRight();
+            CommandLine commandLine = CommandLine.parse("tasklist");
+            DefaultExecutor executor = new DefaultExecutor();
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
+            executor.setStreamHandler(streamHandler);
+            executor.execute(commandLine);
+
+            String taskStr = outputStream.toString(Charset.defaultCharset().name());
             if (StringUtils.isBlank(taskStr)) {
                 return new ArrayList<>();
             }
@@ -87,12 +107,20 @@ public class SystemUtil {
                         return systemTask;
                     }).filter(Objects::nonNull).collect(Collectors.toList());
         } catch (Exception e) {
-            System.out.println("获取命令时出现异常");
-            e.printStackTrace();
+            log.error("获取命令时出现异常", e);
         }
         return new ArrayList<>();
     }
+
     public static boolean killProcess(String processName) {
-        return run("taskkill /F /IM " + processName).getLeft();
+        try {
+            CommandLine commandLine = CommandLine.parse("taskkill /F /IM " + processName);
+            DefaultExecutor executor = new DefaultExecutor();
+            executor.execute(commandLine);
+            return true;
+        } catch (Exception e) {
+            log.error("执行命令时出错：", e);
+        }
+        return false;
     }
 }
