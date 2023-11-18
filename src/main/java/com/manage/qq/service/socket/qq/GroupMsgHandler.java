@@ -1,18 +1,15 @@
 package com.manage.qq.service.socket.qq;
 
 import com.manage.qq.config.Config;
-import com.manage.qq.enums.CQEnum;
 import com.manage.qq.gateway.N2NGateway;
 import com.manage.qq.gateway.QQGateway;
-import com.manage.qq.model.qq.QQWsMessage;
-import org.apache.commons.lang3.StringUtils;
+import com.manage.qq.model.qq.QQInteractiveDTO;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.Objects;
 
 @Component
-public class GroupMsgHandler implements QQMsgHandler {
+public class GroupMsgHandler extends QQMsgHandler {
     @Resource
     private QQGateway qqGateway;
     @Resource
@@ -21,22 +18,12 @@ public class GroupMsgHandler implements QQMsgHandler {
     private Config config;
 
     @Override
-    public void handleMsg(QQWsMessage qqWsMessage) {
-        if (qqWsMessage == null
-                || !Objects.equals(config.getArkNoticeGroupId(), String.valueOf(qqWsMessage.getGroup_id()))
-                || !Objects.equals(qqWsMessage.getPost_type(), "message")
-                || StringUtils.isBlank(qqWsMessage.getMessage())) {
+    public void handleMsg(QQInteractiveDTO qqWsMessage) {
+        if (qqWsMessage != null) {
             return;
         }
 
-        String qqMsg = qqWsMessage.getMessage();
-        String atMe = String.format(CQEnum.AT.getSendFormat(), config.getQqNumber());
-        if (!qqMsg.contains(atMe)) {
-            return;
-        }
-        String msgContent = StringUtils.strip(qqMsg.replace(atMe, ""));
-        System.out.println("收到@我的QQ消息: " + msgContent);
-        switch (msgContent) {
+        switch (qqWsMessage.getT()) {
             case "重启n2n":
                 boolean restart = n2NGateway.restart();
                 qqGateway.sendGroupMsg("开启n2n" + (restart ? "成功" : "失败"), config.getArkNoticeGroupId());

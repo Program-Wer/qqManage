@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -13,6 +17,10 @@ import java.io.IOException;
  */
 public class JsonUtil {
     private static ObjectMapper objectMapper = new ObjectMapper();
+
+    private static Configuration configuration = Configuration.defaultConfiguration()
+            .addOptions(Option.DEFAULT_PATH_LEAF_TO_NULL)
+            .addOptions(Option.SUPPRESS_EXCEPTIONS);
 
     static {
         // 忽略空属性
@@ -60,4 +68,16 @@ public class JsonUtil {
         }
     }
 
+    public static <T> T parseFromPath(String jsonString, String jsonPath, Class<T> valueType) {
+        if (StringUtils.isEmpty(jsonString) || StringUtils.isEmpty(jsonPath)) {
+            return null;
+        }
+        try {
+            DocumentContext documentContext = JsonPath.using(configuration).parse(jsonString);
+            return documentContext.read(jsonPath, valueType);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

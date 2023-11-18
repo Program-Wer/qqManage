@@ -1,32 +1,45 @@
 package com.manage.qq.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.manage.qq.gateway.QQGateway;
 import com.manage.qq.model.CommonRes;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import lombok.extern.slf4j.Slf4j;
+import okhttp3.*;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class HttpUtil {
-    static OkHttpClient client = new OkHttpClient();
+    static OkHttpClient client = new OkHttpClient.Builder()
+            .connectTimeout(300, TimeUnit.SECONDS)
+            .readTimeout(300, TimeUnit.SECONDS)
+            .writeTimeout(300, TimeUnit.SECONDS)
+            .build();
+
     public static String sendGet(String url, Map<String, String> params) {
+        return sendGet(url, params, new HashMap<>());
+    }
+
+    public static String sendGet(String url, Map<String, String> params, Map<String, String> headers) {
         String result = "";
         HttpUrl.Builder urlBuilder = HttpUrl.parse(url).newBuilder();
         for (String key : params.keySet()) {
             urlBuilder.addQueryParameter(key, params.get(key));
         }
         String requestUrl = urlBuilder.build().toString();
-        Request request = new Request.Builder()
+        Request.Builder builder = new Request.Builder();
+        for (String key : headers.keySet()) {
+            builder.header(key, headers.get(key));
+        }
+        Request request = builder
                 .url(requestUrl)
                 .build();
         try (Response response = client.newCall(request).execute()) {
             result = response.body().string();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("sendGet error req:{}", JsonUtil.toJson(request), e);
         }
         return result;
     }
@@ -35,24 +48,32 @@ public class HttpUtil {
         String res = sendGet(url, params);
         CommonRes<T> commonRes = JsonUtil.fromJson(res, reference);
         if (commonRes == null || !commonRes.isSuccess()) {
-            System.out.println("sendGetQQ error:" + JsonUtil.toJson(commonRes));
+            log.error("sendGetQQ error req:{}", JsonUtil.toJson(commonRes));
         }
         return commonRes;
+    }
 
+    public static String sendPost(String url, Map<String, Object> params, Map<String, String> headers) {
+        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), JsonUtil.toJson(params));
+        Request.Builder builder = new Request.Builder()
+                .url(url)
+                .method("POST", requestBody);
+        for (String key : headers.keySet()) {
+            builder.addHeader(key, headers.get(key));
+        }
+        Request request = builder.addHeader("Content-Type", "application/json").build();
+        try (Response response = client.newCall(request).execute()) {
+            return response.body().string();
+        } catch (IOException e) {
+            log.error("sendPost error req:{}", JsonUtil.toJson(request), e);
+            return null;
+        }
     }
 
     public static void main(String[] args) {
-        Map<String, String> map = new HashMap<>();
-        map.put("user_id", "1695807914");
-        map.put("message", "[CQ:tts,text=你在干什么？]");
-        String s = null;
-//         s = sendGet("http://127.0.0.1:5700/send_private_msg", map);
-        System.out.println(s);
-        map = new HashMap<>();
-        map.put("group_id", "637485030");
-        map.put("message", "[CQ:tts,text=老油条，你这个傻逼？]");
-//        map.put("message", "123[CQ:image,file=file:/D:/software/cqhttp/data/images/1.png]");
-        s = sendGet("http://127.0.0.1:5700/send_group_msg", map);
-        System.out.println(s);
+        HashMap<String, String> params = new HashMap<>();
+        HashMap<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bot 102074177.DMv72JnbE790odRw1VHyNWdjoi9lpn0H");
+        System.out.println(sendGet("https://sandbox.api.sgroup.qq.com/gateway/bot", params, headers));
     }
 }
