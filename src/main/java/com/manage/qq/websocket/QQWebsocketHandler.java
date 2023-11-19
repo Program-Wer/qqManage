@@ -42,6 +42,7 @@ public class QQWebsocketHandler extends TextWebSocketHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) {
         try {
             // 处理收到的消息
+            qqGateway.setWebSocketSession(session);
             String payload = message.getPayload();
             QQInteractiveDTO qqInteractiveDTO = JsonUtil.fromJson(payload, QQInteractiveDTO.class);
             if (qqInteractiveDTO == null) {
@@ -49,7 +50,6 @@ public class QQWebsocketHandler extends TextWebSocketHandler {
             }
 
             // 设置最近收到的消息,用于保活
-            qqAliveMonitor.setWebSocketSession(session);
             if (qqInteractiveDTO.getS() > 0) {
                 qqAliveMonitor.setLastMessageId(qqInteractiveDTO.getS());
             }
