@@ -5,6 +5,7 @@ import com.manage.qq.model.CommonRes;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,6 +63,41 @@ public class HttpUtil {
             builder.addHeader(key, headers.get(key));
         }
         Request request = builder.addHeader("Content-Type", "application/json").build();
+        try (Response response = client.newCall(request).execute()) {
+            return response.body().string();
+        } catch (IOException e) {
+            log.error("sendPost error req:{}", JsonUtil.toJson(request), e);
+            return null;
+        }
+    }
+
+    public static String sendPostContainsImage(String url, Map<String, Object> params, Map<String, String> headers, String imagePath) {
+        Request request = null;
+        try {
+            File file = new File(imagePath);
+            MultipartBody.Builder builder = new MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart("file_image", file.getName(),
+                            RequestBody.create(MediaType.parse("image/jpeg"), file));
+
+            // 添加参数
+            for (Map.Entry<String, Object> entry : params.entrySet()) {
+                builder.addFormDataPart(entry.getKey(), String.valueOf(entry.getValue()));
+            }
+
+            RequestBody requestBody = builder.build();
+            Request.Builder requestBuilder = new Request.Builder()
+                    .url(url)
+                    .method("POST", requestBody);
+            for (String key : headers.keySet()) {
+                requestBuilder.addHeader(key, headers.get(key));
+            }
+            request = requestBuilder.build();
+        } catch (Exception e) {
+            log.error("sendPost error req:{}", JsonUtil.toJson(request), e);
+            return null;
+        }
+
         try (Response response = client.newCall(request).execute()) {
             return response.body().string();
         } catch (IOException e) {

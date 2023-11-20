@@ -18,7 +18,7 @@ import java.util.concurrent.Executors;
 
 @Component
 @Slf4j
-public class ReplayMsgHandler extends QQMsgHandler {
+public class GptReplayMsgHandler extends QQMsgHandler {
     @Resource
     private QQGateway qqGateway;
     @Resource

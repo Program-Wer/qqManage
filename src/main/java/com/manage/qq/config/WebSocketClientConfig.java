@@ -3,15 +3,14 @@ package com.manage.qq.config;
 import com.manage.qq.gateway.QQGateway;
 import com.manage.qq.task.QQAliveMonitor;
 import com.manage.qq.websocket.QQWebsocketHandler;
-import lombok.SneakyThrows;
-import org.springframework.context.annotation.Bean;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.client.WebSocketClient;
-import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 @Configuration
+@Slf4j
 public class WebSocketClientConfig {
     @Resource
     private Config config;
@@ -22,15 +21,10 @@ public class WebSocketClientConfig {
     @Resource
     private QQGateway qqGateway;
 
-    @SneakyThrows
-    @Bean
-    public WebSocketClient webSocketClient() {
-        StandardWebSocketClient standardWebSocketClient = new StandardWebSocketClient();
-
+    @PostConstruct
+    public void createQQConnect() {
         // 连接QQ
-        qqGateway.connectWebSocket(standardWebSocketClient, qqWebsocketHandler);
-
-        return standardWebSocketClient;
+        qqGateway.connectWebSocket(qqWebsocketHandler);
     }
 
     public static void main(String[] args) {

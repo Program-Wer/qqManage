@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.manage.qq.config.Config;
 import com.manage.qq.model.CommonRes;
 import com.manage.qq.model.qq.QQInteractiveDTO;
+import com.manage.qq.model.qq.QQMsgSendRequest;
 import com.manage.qq.task.QQAliveMonitor;
 import com.manage.qq.util.HttpUtil;
 import com.manage.qq.util.JsonUtil;
@@ -17,6 +18,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.WebSocketClient;
+import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 
 import javax.annotation.Resource;
 import java.io.IOException;
@@ -33,6 +35,8 @@ public class QQGateway {
     private QQAliveMonitor qqAliveMonitor;
     @Setter
     private volatile WebSocketSession webSocketSession;
+    @Setter
+    private volatile WebSocketClient webSocketClient;
 
     private final String HTTP_FORMATE = "http://%s:%s/%s";
 
@@ -61,8 +65,31 @@ public class QQGateway {
         HttpUtil.sendGetQQ(url, map, new TypeReference<CommonRes<Object>>() {});
     }
 
-    public void connectWebSocket(WebSocketClient webSocketClient, WebSocketHandler webSocketHandler) {
+    public String sendMsg(QQMsgSendRequest qqMsgSendRequest, String channelId) {
+        String url = String.format("https://sandbox.api.sgroup.qq.com/channels/%s/messages", channelId);
+        Map<String, Object> params = JsonUtil.fromJson(JsonUtil.toJson(qqMsgSendRequest), new TypeReference<Map<String, Object>>() {
+        });
+        HashMap<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bot 102074177.DMv72JnbE790odRw1VHyNWdjoi9lpn0H");
+        return HttpUtil.sendPost(url, params, headers);
+    }
+
+    public String sendMsg(QQMsgSendRequest qqMsgSendRequest, String channelId, String imagePath) {
+        String url = String.format("https://sandbox.api.sgroup.qq.com/channels/%s/messages", channelId);
+        Map<String, Object> params = JsonUtil.fromJson(JsonUtil.toJson(qqMsgSendRequest), new TypeReference<Map<String, Object>>() {
+        });
+        HashMap<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bot 102074177.DMv72JnbE790odRw1VHyNWdjoi9lpn0H");
+        return HttpUtil.sendPostContainsImage(url, params, headers, imagePath);
+    }
+
+    public void connectWebSocket(WebSocketHandler webSocketHandler) {
         try {
+            if (webSocketSession != null) {
+                webSocketSession.close();
+            }
+            webSocketClient = new StandardWebSocketClient();
+
             // 获取QQ的连接
             HashMap<String, String> params = new HashMap<>();
             HashMap<String, String> headers = new HashMap<>();
@@ -89,9 +116,9 @@ public class QQGateway {
         }
     }
 
-    public void keepAlive(int lastMessageId) {
+    public boolean keepAlive(int lastMessageId) {
         if (webSocketSession == null) {
-            throw new RuntimeException("webSocketSession为空，无法保活");
+            return false;
         }
 
         QQInteractiveDTO aliveReq = new QQInteractiveDTO();
@@ -100,8 +127,10 @@ public class QQGateway {
 
         try {
             webSocketSession.sendMessage(new TextMessage(JsonUtil.toJson(aliveReq)));
+            return true;
         } catch (Exception e) {
             log.error("保活请求发送失败", e);
+            return false;
         }
     }
 

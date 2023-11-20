@@ -5,6 +5,7 @@
         </filter>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <charset>UTF-8</charset>
         </encoder>
     </appender>
 
@@ -18,6 +19,7 @@
         </rollingPolicy>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <charset>UTF-8</charset>
         </encoder>
     </appender>
 
@@ -31,6 +33,7 @@
         </rollingPolicy>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <charset>UTF-8</charset>
         </encoder>
     </appender>
 
@@ -44,6 +47,7 @@
         </rollingPolicy>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <charset>UTF-8</charset>
         </encoder>
     </appender>
 
@@ -53,4 +57,5 @@
         <appender-ref ref="WARN_FILE" />
         <appender-ref ref="ERROR_FILE" />
     </root>
+    <Property name="charset" value="UTF-8"/>
 </configuration>
