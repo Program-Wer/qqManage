@@ -7,9 +7,12 @@ import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,6 +23,7 @@ import java.util.stream.Collectors;
 public class SystemUtil {
     static Charset cmdCharset = Charset.forName("GBK");
     public static void main(String[] args) {
+        takeScreenshot();
         System.out.println(runAndReturn("tasklist"));
     }
 
@@ -122,5 +126,22 @@ public class SystemUtil {
             log.error("执行命令时出错：", e);
         }
         return false;
+    }
+
+    public static String takeScreenshot() {
+        try {
+            Robot robot = new Robot();
+            Rectangle screenRect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
+            BufferedImage screenshot = robot.createScreenCapture(screenRect);
+
+            // 保存到本地文件
+            File outputFile = new File(FileUtil.genUniqueFileNameContainsPath("screenshot", ".png"));
+            ImageIO.write(screenshot, "png", outputFile);
+
+            return outputFile.getAbsolutePath();
+        } catch (Exception e) {
+            log.error("takeScreenshot error", e);
+        }
+        return null;
     }
 }

@@ -21,6 +21,10 @@ import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 
 import javax.annotation.Resource;
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -42,6 +46,22 @@ public class QQGateway {
 
     private final String HTTP_FORMATE = "http://%s:%s/%s";
 
+    public static void main(String[] args) {
+        try {
+            Robot robot = new Robot();
+            Rectangle screenRect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
+            BufferedImage screenshot = robot.createScreenCapture(screenRect);
+
+            // 保存到本地文件
+            File outputFile = new File("screenshot.png");
+            ImageIO.write(screenshot, "png", outputFile);
+
+            System.out.println("Screenshot saved to: " + outputFile.getAbsolutePath());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void sendMsg(String msg, String groupId, String privateId) {
         if (StringUtils.isNotBlank(groupId)) {
             sendGroupMsg(msg, groupId);
@@ -56,7 +76,8 @@ public class QQGateway {
         map.put("group_id", groupId);
         map.put("message", msg);
         String url = String.format(HTTP_FORMATE, config.getQqIp(), config.getQqHttpPort(), URL.SEND_GROUP_MSG.getUrl());
-        HttpUtil.sendGetQQ(url, map, new TypeReference<CommonRes<Object>>() {});
+        HttpUtil.sendGetQQ(url, map, new TypeReference<CommonRes<Object>>() {
+        });
     }
 
     public void sendPrivateMsg(String msg, String privateId) {
@@ -64,7 +85,8 @@ public class QQGateway {
         map.put("user_id", privateId);
         map.put("message", msg);
         String url = String.format(HTTP_FORMATE, config.getQqIp(), config.getQqHttpPort(), URL.SEND_PRIVATE_MSG.getUrl());
-        HttpUtil.sendGetQQ(url, map, new TypeReference<CommonRes<Object>>() {});
+        HttpUtil.sendGetQQ(url, map, new TypeReference<CommonRes<Object>>() {
+        });
     }
 
     public String sendMsg(QQMsgSendRequest qqMsgSendRequest, String channelId) {
@@ -109,8 +131,8 @@ public class QQGateway {
             discordRequest.setOp(2);
             QQInteractiveDTO.Message d = new QQInteractiveDTO.Message();
             d.setToken("Bot 102074177.DMv72JnbE790odRw1VHyNWdjoi9lpn0H");
-            d.setIntents((1 << 30) | 0 |(1 << 12) | (1 << 9));
-            d.setShard(Arrays.asList(0,1));
+            d.setIntents((1 << 30) | 0 | (1 << 12) | (1 << 9));
+            d.setShard(Arrays.asList(0, 1));
             discordRequest.setD(d);
             TextMessage webSocketMessage = new TextMessage(JsonUtil.toJson(discordRequest));
             webSocketSession.sendMessage(webSocketMessage);
@@ -140,12 +162,12 @@ public class QQGateway {
         }
     }
 
-    @Getter
-    @AllArgsConstructor
-    enum URL {
-        SEND_PRIVATE_MSG("send_private_msg"),
-        SEND_GROUP_MSG("send_group_msg"),
-        ;
-        private String url;
-    }
+@Getter
+@AllArgsConstructor
+enum URL {
+    SEND_PRIVATE_MSG("send_private_msg"),
+    SEND_GROUP_MSG("send_group_msg"),
+    ;
+    private String url;
+}
 }

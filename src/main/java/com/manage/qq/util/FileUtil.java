@@ -1,5 +1,6 @@
 package com.manage.qq.util;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.imageio.ImageIO;
@@ -24,7 +25,7 @@ public class FileUtil {
     }
 
     public static String genUniqueFileName(String tag, String suffix) {
-        return tag + "-" + System.currentTimeMillis() + "-"+ Math.abs(random.nextInt()) + "-" + suffix;
+        return tag + "-" + TimeUtil.formatTime(System.currentTimeMillis()) + "-"+ RandomUtils.nextInt(0, Integer.MAX_VALUE) + suffix;
     }
 
     /**

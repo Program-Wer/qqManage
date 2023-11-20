@@ -2,11 +2,10 @@ package com.manage.qq.service.socket.qq;
 
 import com.manage.qq.config.Config;
 import com.manage.qq.enums.CommandEnum;
+import com.manage.qq.gateway.N2NGateway;
 import com.manage.qq.gateway.QQGateway;
 import com.manage.qq.model.qq.QQInteractiveDTO;
 import com.manage.qq.model.qq.QQMsgSendRequest;
-import com.manage.qq.util.FileUtil;
-import com.manage.qq.util.SystemUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -18,9 +17,11 @@ import java.util.concurrent.Executors;
 
 @Component
 @Slf4j
-public class CommandExecReplayMsgHandler extends QQMsgHandler {
+public class N2NRestartReplayMsgHandler extends QQMsgHandler {
     @Resource
     private QQGateway qqGateway;
+    @Resource
+    private N2NGateway n2NGateway;
     @Resource
     private Config config;
 
@@ -37,22 +38,13 @@ public class CommandExecReplayMsgHandler extends QQMsgHandler {
             return;
         }
 
-        if (CommandEnum.COMMAND_EXECUTE.judgeCommand(content)) {
+        if (CommandEnum.COMMAND_N2N_RESTART.judgeCommand(content)) {
             executor.submit(() -> {
-                String command = CommandEnum.COMMAND_EXECUTE.handleCommand(content);
-                String execRes = SystemUtil.runAndReturn("cmd /c " + command);
-
+                boolean restart = n2NGateway.restart();
                 QQMsgSendRequest qqMsgSendRequest = new QQMsgSendRequest();
                 qqMsgSendRequest.setMsgId(qqInteractiveDTO.getId());
-                if (execRes == null) {
-                    qqMsgSendRequest.setContent("命令执行异常");
-                    qqGateway.sendMsg(qqMsgSendRequest, "634091544");
-                } else {
-                    qqMsgSendRequest.setContent("命令执行成功");
-                    String textImageFilePath = FileUtil.genUniqueFileNameContainsPath("cmd", ".png");
-                    FileUtil.textToImage(execRes, textImageFilePath);
-                    qqGateway.sendMsg(qqMsgSendRequest, "634091544", textImageFilePath);
-                }
+                qqMsgSendRequest.setContent("开启n2n" + (restart ? "成功" : "失败"));
+                qqGateway.sendMsg(qqMsgSendRequest, "634091544");
             });
         }
     }

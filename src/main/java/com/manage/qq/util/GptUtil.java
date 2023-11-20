@@ -8,7 +8,7 @@ public class GptUtil {
         HashMap<String, Object> params = new HashMap<>();
         params.put("model", "Mistral OpenOrca");
         params.put("prompt", content);
-        params.put("max_tokens", 3000);
+        params.put("max_tokens", 1500);
         params.put("temperature", 0);
         params.put("stream", true);
         String s = HttpUtil.sendPost("http://localhost:4891/v1/completions", params, new HashMap<>());
