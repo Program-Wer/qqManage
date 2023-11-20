@@ -40,7 +40,7 @@ public class HttpUtil {
         try (Response response = client.newCall(request).execute()) {
             result = response.body().string();
         } catch (Exception e) {
-            log.error("sendGet error req:{}", JsonUtil.toJson(request), e);
+            log.error("sendGet error req:{}", request, e);
         }
         return result;
     }
@@ -66,7 +66,7 @@ public class HttpUtil {
         try (Response response = client.newCall(request).execute()) {
             return response.body().string();
         } catch (IOException e) {
-            log.error("sendPost error req:{}", JsonUtil.toJson(request), e);
+            log.error("sendPost error req:{}", request, e);
             return null;
         }
     }

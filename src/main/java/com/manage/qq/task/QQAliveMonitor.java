@@ -7,7 +7,6 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.client.WebSocketClient;
 
 import javax.annotation.Resource;
 
@@ -33,11 +32,21 @@ public class QQAliveMonitor {
             boolean keepAlive = qqGateway.keepAlive(lastMessageId);
             if (!keepAlive) {
                 log.warn("保活失败，进行重连");
-                qqGateway.connectWebSocket(qqWebsocketHandler);
+                boolean connectWebSocket = qqGateway.connectWebSocket(qqWebsocketHandler);
+                if (connectWebSocket) {
+                    log.info("重连成功");
+                } else {
+                    log.info("重连失败");
+                }
             }
         } catch (Exception e) {
             log.error("QQ保活失败", e);
-            qqGateway.connectWebSocket(qqWebsocketHandler);
+            boolean connectWebSocket = qqGateway.connectWebSocket(qqWebsocketHandler);
+            if (connectWebSocket) {
+                log.info("重连成功");
+            } else {
+                log.info("重连失败");
+            }
         }
     }
 }

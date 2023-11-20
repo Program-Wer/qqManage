@@ -38,6 +38,8 @@ public class QQGateway {
     @Setter
     private volatile WebSocketClient webSocketClient;
 
+    private volatile String wsUrl = null;
+
     private final String HTTP_FORMATE = "http://%s:%s/%s";
 
     public void sendMsg(String msg, String groupId, String privateId) {
@@ -83,7 +85,7 @@ public class QQGateway {
         return HttpUtil.sendPostContainsImage(url, params, headers, imagePath);
     }
 
-    public void connectWebSocket(WebSocketHandler webSocketHandler) {
+    public boolean connectWebSocket(WebSocketHandler webSocketHandler) {
         try {
             if (webSocketSession != null) {
                 webSocketSession.close();
@@ -95,10 +97,14 @@ public class QQGateway {
             HashMap<String, String> headers = new HashMap<>();
             headers.put("Authorization", "Bot 102074177.DMv72JnbE790odRw1VHyNWdjoi9lpn0H");
             String websocketRes = HttpUtil.sendGet("https://sandbox.api.sgroup.qq.com/gateway/bot", params, headers);
-            String wsUrl = JsonUtil.parseFromPath(websocketRes, "$.url", String.class);
+            String newWsUrl = JsonUtil.parseFromPath(websocketRes, "$.url", String.class);
+            if (StringUtils.isBlank(newWsUrl)) {
+                newWsUrl = wsUrl;
+            }
+            wsUrl = newWsUrl;
 
             // 创建鉴权,开始连接
-            WebSocketSession webSocketSession = webSocketClient.doHandshake(webSocketHandler, wsUrl).get();
+            webSocketSession = webSocketClient.doHandshake(webSocketHandler, this.wsUrl).get();
             QQInteractiveDTO discordRequest = new QQInteractiveDTO();
             discordRequest.setOp(2);
             QQInteractiveDTO.Message d = new QQInteractiveDTO.Message();
@@ -109,10 +115,10 @@ public class QQGateway {
             TextMessage webSocketMessage = new TextMessage(JsonUtil.toJson(discordRequest));
             webSocketSession.sendMessage(webSocketMessage);
 
-            // 创建保活任务
-            setWebSocketSession(webSocketSession);
+            return true;
         } catch (Exception e) {
             log.error("连接QQ WebSocket失败", e);
+            return false;
         }
     }
 
