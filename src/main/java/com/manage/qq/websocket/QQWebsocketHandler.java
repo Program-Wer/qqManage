@@ -1,16 +1,19 @@
 package com.manage.qq.websocket;
 
+import com.jayway.jsonpath.DocumentContext;
 import com.manage.qq.config.Config;
 import com.manage.qq.gateway.ArkGateway;
 import com.manage.qq.gateway.N2NGateway;
 import com.manage.qq.gateway.QQGateway;
 import com.manage.qq.model.qq.QQInteractiveDTO;
+import com.manage.qq.model.qq.QQMessageBO;
 import com.manage.qq.service.socket.qq.QQMsgHandler;
 import com.manage.qq.task.QQAliveMonitor;
 import com.manage.qq.util.GptUtil;
 import com.manage.qq.util.HttpUtil;
 import com.manage.qq.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
@@ -44,22 +47,41 @@ public class QQWebsocketHandler extends TextWebSocketHandler {
             // 处理收到的消息
             qqGateway.setWebSocketSession(session);
             String payload = message.getPayload();
-            QQInteractiveDTO qqInteractiveDTO = JsonUtil.fromJson(payload, QQInteractiveDTO.class);
-            if (qqInteractiveDTO == null) {
+            QQMessageBO qqMessageBO = convertQQMessageBO(payload);
+            if (qqMessageBO == null) {
                 return;
             }
 
             // 设置最近收到的消息,用于保活
-            if (qqInteractiveDTO.getS() > 0) {
-                qqAliveMonitor.setLastMessageId(qqInteractiveDTO.getS());
+            if (qqMessageBO.getSerialNumber() > 0) {
+                qqAliveMonitor.setLastMessageId(qqMessageBO.getSerialNumber());
             }
 
             // 处理消息
             for (QQMsgHandler qqMsgHandler : qqMsgHandlerList) {
-                qqMsgHandler.handle(qqInteractiveDTO);
+                qqMsgHandler.handle(qqMessageBO);
             }
         } catch (Throwable e) {
             log.error("WS处理消息异常", e);
         }
+    }
+
+    private QQMessageBO convertQQMessageBO(String msg) {
+        DocumentContext documentContext = JsonUtil.parseDocumentContext(msg);
+        if (documentContext == null) {
+            return null;
+        }
+        QQMessageBO qqMessageBO = new QQMessageBO();
+        qqMessageBO.setMessageId(JsonUtil.parseFromPath(documentContext, "$.id", String.class));
+        qqMessageBO.setEventType(JsonUtil.parseFromPath(documentContext, "$.t", String.class));
+        qqMessageBO.setContent(JsonUtil.parseFromPath(documentContext, "$.d.content", String.class));
+        qqMessageBO.setAuthorId(JsonUtil.parseFromPath(documentContext, "$.d.author.id", String.class));
+        qqMessageBO.setAuthorName(JsonUtil.parseFromPath(documentContext, "$.d.author.username", String.class));
+        qqMessageBO.setChannelId(JsonUtil.parseFromPath(documentContext, "$.d.channel_id", String.class));
+        qqMessageBO.setGuildId(JsonUtil.parseFromPath(documentContext, "$.d.guild_id", String.class));
+        qqMessageBO.setOperateType(ObjectUtils.defaultIfNull(JsonUtil.parseFromPath(documentContext, "$.op", Integer.class), 0));
+        Integer serialNumber = ObjectUtils.defaultIfNull(JsonUtil.parseFromPath(documentContext, "$.s", Integer.class), 0);
+        qqMessageBO.setSerialNumber(serialNumber);
+        return qqMessageBO;
     }
 }

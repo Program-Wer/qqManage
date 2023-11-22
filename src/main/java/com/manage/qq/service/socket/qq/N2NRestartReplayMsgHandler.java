@@ -5,6 +5,7 @@ import com.manage.qq.enums.CommandEnum;
 import com.manage.qq.gateway.N2NGateway;
 import com.manage.qq.gateway.QQGateway;
 import com.manage.qq.model.qq.QQInteractiveDTO;
+import com.manage.qq.model.qq.QQMessageBO;
 import com.manage.qq.model.qq.QQMsgSendRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -28,12 +29,12 @@ public class N2NRestartReplayMsgHandler extends QQMsgHandler {
     static final ExecutorService executor = Executors.newFixedThreadPool(5);
 
     @Override
-    public void handleMsg(QQInteractiveDTO qqInteractiveDTO) {
-        if (qqInteractiveDTO.getId() == null) {
+    public void handleMsg(QQMessageBO qqWsMessage) {
+        if (qqWsMessage.getMessageId() == null) {
             return;
         }
 
-        String content = Optional.of(qqInteractiveDTO).map(QQInteractiveDTO::getD).map(QQInteractiveDTO.Message::getContent).orElse(null);
+        String content = Optional.of(qqWsMessage).map(QQMessageBO::getContent).orElse(null);
         if (StringUtils.isBlank(content)) {
             return;
         }
@@ -42,7 +43,7 @@ public class N2NRestartReplayMsgHandler extends QQMsgHandler {
             executor.submit(() -> {
                 boolean restart = n2NGateway.restart();
                 QQMsgSendRequest qqMsgSendRequest = new QQMsgSendRequest();
-                qqMsgSendRequest.setMsgId(qqInteractiveDTO.getId());
+                qqMsgSendRequest.setMsgId(qqWsMessage.getMessageId());
                 qqMsgSendRequest.setContent("开启n2n" + (restart ? "成功" : "失败"));
                 qqGateway.sendMsg(qqMsgSendRequest, "634091544");
             });

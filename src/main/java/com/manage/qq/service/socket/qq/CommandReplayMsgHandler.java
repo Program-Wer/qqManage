@@ -3,15 +3,11 @@ package com.manage.qq.service.socket.qq;
 import com.manage.qq.config.Config;
 import com.manage.qq.gateway.N2NGateway;
 import com.manage.qq.gateway.QQGateway;
-import com.manage.qq.model.qq.QQInteractiveDTO;
-import com.manage.qq.util.HttpUtil;
+import com.manage.qq.model.qq.QQMessageBO;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -28,7 +24,7 @@ public class CommandReplayMsgHandler extends QQMsgHandler {
     static final ExecutorService executor = Executors.newFixedThreadPool(5);
 
     @Override
-    public void handleMsg(QQInteractiveDTO qqInteractiveDTO) {
+    public void handleMsg(QQMessageBO qqInteractiveDTO) {
 //        if (qqInteractiveDTO.getId() == null) {
 //            return;
 //        }

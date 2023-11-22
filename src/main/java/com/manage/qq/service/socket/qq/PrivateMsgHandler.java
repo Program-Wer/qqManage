@@ -1,12 +1,12 @@
 package com.manage.qq.service.socket.qq;
 
-import com.manage.qq.model.qq.QQInteractiveDTO;
+import com.manage.qq.model.qq.QQMessageBO;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PrivateMsgHandler extends QQMsgHandler {
     @Override
-    void handleMsg(QQInteractiveDTO qqWsMessage) {
+    void handleMsg(QQMessageBO qqWsMessage) {
 
     }
 //    @Resource

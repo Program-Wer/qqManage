@@ -4,8 +4,8 @@ import com.manage.qq.config.Config;
 import com.manage.qq.enums.CommandEnum;
 import com.manage.qq.gateway.QQGateway;
 import com.manage.qq.model.qq.QQInteractiveDTO;
+import com.manage.qq.model.qq.QQMessageBO;
 import com.manage.qq.model.qq.QQMsgSendRequest;
-import com.manage.qq.util.FileUtil;
 import com.manage.qq.util.SystemUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -27,12 +27,12 @@ public class ShotScreenReplayMsgHandler extends QQMsgHandler {
     static final ExecutorService executor = Executors.newFixedThreadPool(5);
 
     @Override
-    public void handleMsg(QQInteractiveDTO qqInteractiveDTO) {
-        if (qqInteractiveDTO.getId() == null) {
+    public void handleMsg(QQMessageBO qqWsMessage) {
+        if (qqWsMessage.getMessageId() == null) {
             return;
         }
 
-        String content = Optional.of(qqInteractiveDTO).map(QQInteractiveDTO::getD).map(QQInteractiveDTO.Message::getContent).orElse(null);
+        String content = Optional.of(qqWsMessage).map(QQMessageBO::getContent).orElse(null);
         if (StringUtils.isBlank(content)) {
             return;
         }
@@ -42,7 +42,7 @@ public class ShotScreenReplayMsgHandler extends QQMsgHandler {
                 String screenshotPath = SystemUtil.takeScreenshot();
 
                 QQMsgSendRequest qqMsgSendRequest = new QQMsgSendRequest();
-                qqMsgSendRequest.setMsgId(qqInteractiveDTO.getId());
+                qqMsgSendRequest.setMsgId(qqWsMessage.getMessageId());
                 if (screenshotPath == null) {
                     qqMsgSendRequest.setContent("截屏失败");
                     qqGateway.sendMsg(qqMsgSendRequest, "634091544");

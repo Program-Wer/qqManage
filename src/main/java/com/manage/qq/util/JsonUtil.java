@@ -8,6 +8,7 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.io.IOException;
 /**
  * json工具类封装
  */
+@Slf4j
 public class JsonUtil {
     private static ObjectMapper objectMapper = new ObjectMapper();
 
@@ -69,14 +71,26 @@ public class JsonUtil {
     }
 
     public static <T> T parseFromPath(String jsonString, String jsonPath, Class<T> valueType) {
-        if (StringUtils.isEmpty(jsonString) || StringUtils.isEmpty(jsonPath)) {
+        return parseFromPath(parseDocumentContext(jsonString), jsonPath, valueType);
+    }
+
+    public static DocumentContext parseDocumentContext(String jsonString) {
+        try {
+            return JsonPath.using(configuration).parse(jsonString);
+        } catch (Exception e) {
+            log.error("parseDocumentContext error json:{}", jsonString, e);
+            return null;
+        }
+    }
+
+    public static <T> T parseFromPath(DocumentContext documentContext, String jsonPath, Class<T> valueType) {
+        if (StringUtils.isEmpty(jsonPath) || documentContext == null) {
             return null;
         }
         try {
-            DocumentContext documentContext = JsonPath.using(configuration).parse(jsonString);
             return documentContext.read(jsonPath, valueType);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("parseFromPath error json:{} path:{}", documentContext, jsonPath, e);
             return null;
         }
     }

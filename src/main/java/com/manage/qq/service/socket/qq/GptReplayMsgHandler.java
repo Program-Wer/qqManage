@@ -4,6 +4,7 @@ import com.manage.qq.config.Config;
 import com.manage.qq.gateway.N2NGateway;
 import com.manage.qq.gateway.QQGateway;
 import com.manage.qq.model.qq.QQInteractiveDTO;
+import com.manage.qq.model.qq.QQMessageBO;
 import com.manage.qq.util.GptUtil;
 import com.manage.qq.util.HttpUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -29,12 +30,12 @@ public class GptReplayMsgHandler extends QQMsgHandler {
     static final ExecutorService executor = Executors.newFixedThreadPool(5);
 
     @Override
-    public void handleMsg(QQInteractiveDTO qqInteractiveDTO) {
-        if (qqInteractiveDTO.getId() == null) {
+    public void handleMsg(QQMessageBO qqWsMessage) {
+        if (qqWsMessage.getMessageId() == null) {
             return;
         }
 
-        String content = Optional.of(qqInteractiveDTO).map(QQInteractiveDTO::getD).map(QQInteractiveDTO.Message::getContent).orElse(null);
+        String content = Optional.of(qqWsMessage).map(QQMessageBO::getContent).orElse(null);
         if (StringUtils.isBlank(content)) {
             return;
         }
@@ -42,7 +43,7 @@ public class GptReplayMsgHandler extends QQMsgHandler {
         if (StringUtils.startsWith(content, "  ") && !StringUtils.startsWith(content, "   ")) {
             executor.submit(() -> {
                 HashMap<String, Object> params = new HashMap<>();
-                params.put("msg_id", qqInteractiveDTO.getId());
+                params.put("msg_id", qqWsMessage.getMessageId());
                 params.put("content", GptUtil.chat(StringUtils.substringAfter(content, "  ")));
                 HashMap<String, String> headers = new HashMap<>();
                 headers.put("Authorization", "Bot 102074177.DMv72JnbE790odRw1VHyNWdjoi9lpn0H");
