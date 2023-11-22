@@ -11,6 +11,7 @@ import com.manage.qq.util.JsonUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,6 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -135,7 +135,7 @@ public class QQGateway {
             d.setShard(Arrays.asList(0, 1));
             discordRequest.setD(d);
             TextMessage webSocketMessage = new TextMessage(JsonUtil.toJson(discordRequest));
-            webSocketSession.sendMessage(webSocketMessage);
+            sessionSendMessage(webSocketMessage);
 
             return true;
         } catch (Exception e) {
@@ -154,12 +154,17 @@ public class QQGateway {
         aliveReq.setS(lastMessageId);
 
         try {
-            webSocketSession.sendMessage(new TextMessage(JsonUtil.toJson(aliveReq)));
+            sessionSendMessage(new TextMessage(JsonUtil.toJson(aliveReq)));
             return true;
         } catch (Exception e) {
             log.error("保活请求发送失败", e);
             return false;
         }
+    }
+
+    @SneakyThrows
+    private synchronized void sessionSendMessage(TextMessage webSocketMessage) {
+        webSocketSession.sendMessage(webSocketMessage);
     }
 
 @Getter
