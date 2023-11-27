@@ -1,6 +1,7 @@
 package com.manage.qq.service.socket.qq;
 
 import com.manage.qq.config.Config;
+import com.manage.qq.enums.CommandEnum;
 import com.manage.qq.gateway.N2NGateway;
 import com.manage.qq.gateway.QQGateway;
 import com.manage.qq.model.qq.QQInteractiveDTO;
@@ -40,11 +41,11 @@ public class GptReplayMsgHandler extends QQMsgHandler {
             return;
         }
 
-        if (StringUtils.startsWith(content, "  ") && !StringUtils.startsWith(content, "   ")) {
+        if (CommandEnum.COMMAND_GPT.judgeCommand(content)) {
             executor.submit(() -> {
                 HashMap<String, Object> params = new HashMap<>();
                 params.put("msg_id", qqWsMessage.getMessageId());
-                params.put("content", GptUtil.chat(StringUtils.substringAfter(content, "  ")));
+                params.put("content", GptUtil.chat(CommandEnum.COMMAND_GPT.handleCommand(content)));
                 HashMap<String, String> headers = new HashMap<>();
                 headers.put("Authorization", "Bot 102074177.DMv72JnbE790odRw1VHyNWdjoi9lpn0H");
                 String res = HttpUtil.sendPost("https://sandbox.api.sgroup.qq.com/channels/634091544/messages", params, headers);
