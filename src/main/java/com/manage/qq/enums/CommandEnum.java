@@ -16,6 +16,7 @@ public enum CommandEnum {
     COMMAND_GPT(" ", "  ", null, "【 +${聊天}】和GPT聊天"),
     COMMAND_LEISHEN_INFO(null, null, "查看雷神", "【查看雷神】查看雷神状态"),
     COMMAND_LEISHEN_PAUSE(null, null, "暂停雷神", "【暂停雷神】暂停雷神时长"),
+    COMMAND_LEISHEN_SILENT("雷神静默", null, null, "【雷神静默+${小时数}】让您畅玩N小时雷神，不关闭"),
     ;
     private String prefix;
     private String prohibitedPrefix;

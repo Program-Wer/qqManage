@@ -25,7 +25,7 @@ public class FileUtil {
     }
 
     public static String genUniqueFileName(String tag, String suffix) {
-        return tag + "-" + TimeUtil.formatTime(System.currentTimeMillis()) + "-"+ RandomUtils.nextInt(0, Integer.MAX_VALUE) + suffix;
+        return tag + "-" + TimeUtil.formatFileTime(System.currentTimeMillis()) + "-"+ RandomUtils.nextInt(0, Integer.MAX_VALUE) + suffix;
     }
 
     /**
