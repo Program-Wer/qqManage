@@ -1,8 +1,12 @@
 package com.manage.qq.task;
 
+import com.manage.qq.enums.CommonKvEnum;
 import com.manage.qq.gateway.QQGateway;
 import com.manage.qq.model.qq.QQMsgSendRequest;
+import com.manage.qq.service.CommonKvService;
 import com.manage.qq.util.LeishenUtil;
+import com.manage.qq.util.TimeUtil;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,28 +21,36 @@ public class LeishenAliveMonitor {
     @Resource
     private QQGateway qqGateway;
 
-    // 工作日定时任务，每小时执行一次，2点到19点
-    @Scheduled(cron = "0 0 2-19 ? * MON-FRI")
-    public void workdayTask() {
-        checkPause();
-    }
+    @Resource
+    private CommonKvService commonKvService;
 
 //    // 工作日定时任务，每小时执行一次，2点到19点
-//    @Scheduled(fixedRate = 5000)
-//    public void workxdayTask() {
+//    @Scheduled(cron = "0 0 2-19 ? * MON-FRI")
+//    public void workdayTask() {
 //        checkPause();
 //    }
 
-    // 周末定时任务，每小时执行一次，2点到7点
-    @Scheduled(cron = "0 0 2-7 ? * SAT,SUN")
-    public void weekendTask() {
-        // 执行周末定时任务的逻辑
+    // 每小时执行一次
+    @Scheduled(fixedRate = TimeUtil.HOUR_MS, initialDelay = TimeUtil.HOUR_MS)
+    public void hourTask() {
         checkPause();
     }
+
+//    // 周末定时任务，每小时执行一次，2点到7点
+//    @Scheduled(cron = "0 0 2-7 ? * SAT,SUN")
+//    public void weekendTask() {
+//        // 执行周末定时任务的逻辑
+//        checkPause();
+//    }
 
     private void checkPause() {
         log.info("检测雷神状态任务开始");
         try {
+            Long silentTime = commonKvService.getKeyOrDefault(CommonKvEnum.LEISHEN_SILENT_TIME, 0L);
+            if (System.currentTimeMillis() < silentTime) {
+                log.info("检测雷神状态任务跳过");
+                return;
+            }
             boolean pause = LeishenUtil.isPause();
             if (pause) {
                 return;
