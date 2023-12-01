@@ -17,6 +17,9 @@ public enum CommandEnum {
     COMMAND_LEISHEN_INFO(null, null, "查看雷神", "【查看雷神】查看雷神状态"),
     COMMAND_LEISHEN_PAUSE(null, null, "暂停雷神", "【暂停雷神】暂停雷神时长"),
     COMMAND_LEISHEN_SILENT("雷神静默", null, null, "【雷神静默+${小时数}】让您畅玩N小时雷神，不关闭"),
+    COMMAND_QUICK_COMMAND_LIST(null, null, "查看快捷指令", "【查看快捷指令】查看快捷指令"),
+    COMMAND_QUICK_COMMAND_ADD("添加快捷指令 ", null, null, "【添加快捷指令 +${别名}=${指令}】添加快捷指令"),
+    COMMAND_QUICK_COMMAND_DELETE("删除快捷指令 ", null, null, "【删除快捷指令 +${别名}】删除快捷指令"),
     ;
     private String prefix;
     private String prohibitedPrefix;

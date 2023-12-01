@@ -5,12 +5,10 @@ import com.manage.qq.config.Config;
 import com.manage.qq.gateway.ArkGateway;
 import com.manage.qq.gateway.N2NGateway;
 import com.manage.qq.gateway.QQGateway;
-import com.manage.qq.model.qq.QQInteractiveDTO;
 import com.manage.qq.model.qq.QQMessageBO;
+import com.manage.qq.repository.QuickCommonRepository;
 import com.manage.qq.service.socket.qq.QQMsgHandler;
 import com.manage.qq.task.QQAliveMonitor;
-import com.manage.qq.util.GptUtil;
-import com.manage.qq.util.HttpUtil;
 import com.manage.qq.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -21,9 +19,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 @Slf4j
@@ -40,6 +36,8 @@ public class QQWebsocketHandler extends TextWebSocketHandler {
     private List<QQMsgHandler> qqMsgHandlerList;
     @Resource
     private QQAliveMonitor qqAliveMonitor;
+    @Resource
+    private QuickCommonRepository quickCommonRepository;
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) {
@@ -55,6 +53,11 @@ public class QQWebsocketHandler extends TextWebSocketHandler {
             // 设置最近收到的消息,用于保活
             if (qqMessageBO.getSerialNumber() > 0) {
                 qqAliveMonitor.setLastMessageId(qqMessageBO.getSerialNumber());
+            }
+
+            // 替换快捷指令
+            if (StringUtils.isNoneEmpty(qqMessageBO.getContent())) {
+                quickCommonRepository.findById(qqMessageBO.getContent()).ifPresent(quickCommandDAO -> qqMessageBO.setContent(quickCommandDAO.getCommand()));
             }
 
             // 处理消息

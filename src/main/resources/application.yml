@@ -11,17 +11,16 @@ spring:
     driver-class-name: org.h2.Driver
     username: wzl
     password:
-    jpa:
-      database-platform: org.hibernate.dialect.H2Dialect
-      hibernate:
-        ddl-auto: none
-      database: h2
-      show-sql: true
-      open-in-view: true   #这个是为了进行视图显示，SpringBoot提示的Warn
-    h2: # http://localhost:8088/h2-console/login.do
-      console:
-        enabled: true
-        path: /h2-console
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    database: h2
+    show-sql: true
+    open-in-view: true   #这个是为了进行视图显示，SpringBoot提示的Warn
+  h2: # http://localhost:8088/h2-console/login.do
+    console:
+      enabled: true
 
 server:
   # 端口
