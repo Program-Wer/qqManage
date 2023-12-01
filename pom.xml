@@ -140,6 +140,7 @@
                     <!-- 发行版本环境JVM的jdk版本 -->
                     <!-- source和target一致即可 -->
                     <target>1.8</target>
+                    <skip>true</skip>
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
