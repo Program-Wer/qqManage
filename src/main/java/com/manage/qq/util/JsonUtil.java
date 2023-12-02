@@ -75,6 +75,9 @@ public class JsonUtil {
     }
 
     public static DocumentContext parseDocumentContext(String jsonString) {
+        if (StringUtils.isEmpty(jsonString)) {
+            return null;
+        }
         try {
             return JsonPath.using(configuration).parse(jsonString);
         } catch (Exception e) {

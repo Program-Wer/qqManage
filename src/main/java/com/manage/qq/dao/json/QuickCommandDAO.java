@@ -2,9 +2,7 @@ package com.manage.qq.dao.json;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "quick_command")
@@ -12,5 +10,8 @@ import javax.persistence.Table;
 public class QuickCommandDAO {
     @Id
     private String name;
+
+    @Lob
+    @Column(columnDefinition = "CLOB", length = 10000)
     private String command;
 }

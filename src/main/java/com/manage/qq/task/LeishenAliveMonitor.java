@@ -6,7 +6,6 @@ import com.manage.qq.model.qq.QQMsgSendRequest;
 import com.manage.qq.service.CommonKvService;
 import com.manage.qq.util.LeishenUtil;
 import com.manage.qq.util.TimeUtil;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.scheduling.annotation.Scheduled;

@@ -7,6 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum CommonKvEnum {
     LEISHEN_SILENT_TIME(Long.class),
+    STEAM_PLAYER_INFO(String.class),
     ;
     private Class<?> tClass;
 }

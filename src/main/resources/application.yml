@@ -16,7 +16,7 @@ spring:
     hibernate:
       ddl-auto: update
     database: h2
-    show-sql: true
+    show-sql: false
     open-in-view: true   #这个是为了进行视图显示，SpringBoot提示的Warn
   h2: # http://localhost:8088/h2-console/login.do
     console:

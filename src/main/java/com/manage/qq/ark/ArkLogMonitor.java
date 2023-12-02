@@ -21,7 +21,7 @@ public class ArkLogMonitor {
     @Resource
     private PrivateSubscriptionDAO privateSubscriptionDAO;
 
-    @PostConstruct
+//    @PostConstruct
     public void openMonitor() {
         MyTailerListener myTailerListener = new MyTailerListener(line -> {
             String text = TextUtil.handleLogLine(line);

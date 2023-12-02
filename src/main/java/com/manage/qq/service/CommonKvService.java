@@ -21,7 +21,12 @@ public class CommonKvService {
     }
 
     public <T> T getKeyOrDefault(CommonKvEnum commonKvEnum, T defaultValue) {
-        Optional<CommonKvDAO> kvDAOOptional = commonKvRepository.findById(commonKvEnum.name().toLowerCase());
+        return getKeyOrDefault(commonKvEnum, null, defaultValue);
+    }
+
+    public <T> T getKeyOrDefault(CommonKvEnum commonKvEnum, String key, T defaultValue) {
+        String commonKey = key == null ? commonKvEnum.name().toLowerCase() : commonKvEnum.name().toLowerCase() + "_" + key;
+        Optional<CommonKvDAO> kvDAOOptional = commonKvRepository.findById(commonKey);
         String value = kvDAOOptional.map(CommonKvDAO::getValue).orElse(null);
         if (value == null) {
             return defaultValue;
@@ -40,6 +45,21 @@ public class CommonKvService {
     public void setValue(CommonKvEnum commonKvEnum, Object value) {
         CommonKvDAO commonKvDAO = new CommonKvDAO();
         commonKvDAO.setKey(commonKvEnum.name().toLowerCase());
+        if (value == null) {
+            commonKvDAO.setValue(null);
+        } else {
+            commonKvDAO.setValue(JsonUtil.toJson(value));
+        }
+        commonKvRepository.save(commonKvDAO);
+    }
+
+    public void setValue(CommonKvEnum commonKvEnum, String key, Object value) {
+        CommonKvDAO commonKvDAO = new CommonKvDAO();
+        if (key == null) {
+            commonKvDAO.setKey(commonKvEnum.name().toLowerCase());
+        } else {
+            commonKvDAO.setKey(commonKvEnum.name().toLowerCase() + "_" + key);
+        }
         if (value == null) {
             commonKvDAO.setValue(null);
         } else {
