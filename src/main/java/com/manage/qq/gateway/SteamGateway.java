@@ -29,4 +29,20 @@ public class SteamGateway {
         }
         return list;
     }
+
+    public List<String> getRecentlyPlayGames(String steamId) {
+        String url = "http://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001";
+
+        HashMap<String, String> params = new HashMap<>();
+        params.put("key", key);
+        params.put("steamid", steamId);
+        params.put("format", "json");
+        String res = HttpUtil.sendGet(url, params);
+        List list = JsonUtil.parseFromPath(res, "$.response.games", List.class);
+
+        if (CollectionUtils.isEmpty(list)) {
+            return new ArrayList<>();
+        }
+        return list;
+    }
 }

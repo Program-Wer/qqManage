@@ -8,6 +8,7 @@ import com.manage.qq.model.qq.QQMsgSendRequest;
 import com.manage.qq.service.CommonKvService;
 import com.manage.qq.util.HttpUtil;
 import com.manage.qq.util.JsonUtil;
+import com.manage.qq.util.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -51,13 +52,14 @@ public class SteamMonitor {
                 String dbPlayer = (String) commonKvService.getKeyOrDefault(CommonKvEnum.STEAM_PLAYER_INFO, steamId, null);
                 String dbGameExtraInfo = JsonUtil.parseFromPath(dbPlayer, "$.gameextrainfo", String.class);
 
-                if (!Objects.equals(gameExtraInfo, dbGameExtraInfo)) {
+                if (!Objects.equals(gameExtraInfo, dbGameExtraInfo) && StringUtils.isNotBlank(gameExtraInfo)) {
                     QQMsgSendRequest qqMsgSendRequest = new QQMsgSendRequest();
-                    String content = StringUtils.isNotBlank(gameExtraInfo)
-                            ? String.format("%s偷偷启动了%s", personaName, gameExtraInfo)
-                            : String.format("%s从%s下线了", personaName, dbGameExtraInfo);
+                    String content = String.format("%s偷偷启动了%s", personaName, gameExtraInfo);
                     qqMsgSendRequest.setContent(content);
                     qqGateway.sendMsg(qqMsgSendRequest, "634091544");
+                } else {
+                    // 查找最近玩的游戏
+                    findRecentlyPlayGame(steamId, personaName);
                 }
 
                 commonKvService.setValue(CommonKvEnum.STEAM_PLAYER_INFO, steamId, player);
@@ -67,6 +69,43 @@ public class SteamMonitor {
         }
     }
 
+    public void findRecentlyPlayGame(String steamId, String personaName) {
+        try {
+            List resList = steamGateway.getRecentlyPlayGames(steamId);
+            if (CollectionUtils.isEmpty(resList)) {
+//                log.info("获取Steam最近游玩的游戏失败 res:{}", resList);
+                return;
+            }
+
+            for (Object res : resList) {
+                String game = JsonUtil.toJson(res);
+                DocumentContext documentContext = JsonUtil.parseDocumentContext(game);
+                Long appId = JsonUtil.parseFromPath(documentContext, "$.appid", Long.class);
+                Long playTime = JsonUtil.parseFromPath(documentContext, "$.playtime_forever", Long.class);
+                String gameName = JsonUtil.parseFromPath(documentContext, "$.name", String.class);
+
+                String key = String.format("%s_%s", steamId, appId);
+                String playGame = commonKvService.getKeyOrDefault(CommonKvEnum.STEAM_PLAYER_INFO, key, null);
+                commonKvService.setValue(CommonKvEnum.STEAM_PLAYER_INFO, key, game);
+                if (playGame == null) {
+                    continue;
+                }
+                Long dbPlayTime = JsonUtil.parseFromPath(playGame, "$.playtime_forever", Long.class);
+                dbPlayTime = dbPlayTime == null ? 0 : dbPlayTime;
+
+                if (!Objects.equals(playTime, dbPlayTime) && playTime != null && playTime > 0) {
+                    long playMinus = playTime - dbPlayTime;
+                    long startTime = System.currentTimeMillis() - playMinus * 60 * 1000;
+                    String startDateTime = TimeUtil.formatTime(startTime, TimeUtil.DATETIME_FORMAT);
+                    QQMsgSendRequest qqMsgSendRequest = new QQMsgSendRequest();
+                    qqMsgSendRequest.setContent(String.format("%s偷偷在%s的时候启动了%s，玩到现在，刚溜！", personaName, startDateTime, gameName));
+                    qqGateway.sendMsg(qqMsgSendRequest, "634091544");
+                }
+            }
+        } catch (Exception e) {
+            log.error("查询steam好友状态失败", e);
+        }
+    }
 
     public static void main(String[] args) {
         String s = HttpUtil.sendGet("http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002?key=185DD2AC372EF7181DD8629AACAA5B04&steamids=76561198149901382,76561198834008439", new HashMap<>());

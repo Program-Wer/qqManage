@@ -62,6 +62,8 @@ public class CommonKvService {
         }
         if (value == null) {
             commonKvDAO.setValue(null);
+        } else if (value instanceof String) {
+            commonKvDAO.setValue(String.valueOf(value));
         } else {
             commonKvDAO.setValue(JsonUtil.toJson(value));
         }
