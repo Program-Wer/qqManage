@@ -52,17 +52,40 @@ public class SteamMonitor {
                 String dbPlayer = (String) commonKvService.getKeyOrDefault(CommonKvEnum.STEAM_PLAYER_INFO, steamId, null);
                 String dbGameExtraInfo = JsonUtil.parseFromPath(dbPlayer, "$.gameextrainfo", String.class);
 
-                if (!Objects.equals(gameExtraInfo, dbGameExtraInfo) && StringUtils.isNotBlank(gameExtraInfo)) {
+                if (!Objects.equals(gameExtraInfo, dbGameExtraInfo)) {
                     QQMsgSendRequest qqMsgSendRequest = new QQMsgSendRequest();
-                    String content = String.format("%s偷偷启动了%s", personaName, gameExtraInfo);
+                    String content = StringUtils.isNotBlank(gameExtraInfo)
+                            ? String.format("%s偷偷启动了%s", personaName, gameExtraInfo)
+                            : String.format("%s从%s下线了", personaName, dbGameExtraInfo);
                     qqMsgSendRequest.setContent(content);
                     qqGateway.sendMsg(qqMsgSendRequest, "634091544");
-                } else {
-                    // 查找最近玩的游戏
-                    findRecentlyPlayGame(steamId, personaName);
                 }
 
                 commonKvService.setValue(CommonKvEnum.STEAM_PLAYER_INFO, steamId, player);
+            }
+        } catch (Exception e) {
+            log.error("查询steam好友状态失败", e);
+        }
+    }
+
+    @Scheduled(fixedRate = 3600000)
+    public void findRecentlyPlayGame() {
+        try {
+            List resList = steamGateway.getUsersInfo(steamIds);
+            if (CollectionUtils.isEmpty(resList)) {
+                log.info("获取Steam好友状态失败 res:{}", resList);
+                return;
+            }
+            for (Object res : resList) {
+                String player = JsonUtil.toJson(res);
+                DocumentContext documentContext = JsonUtil.parseDocumentContext(player);
+                String steamId = JsonUtil.parseFromPath(documentContext, "$.steamid", String.class);
+                if (StringUtils.isEmpty(steamId)) {
+                    continue;
+                }
+                String personaName = JsonUtil.parseFromPath(documentContext, "$.personaname", String.class);
+                // 查找最近玩的游戏
+                findRecentlyPlayGame(steamId, personaName);
             }
         } catch (Exception e) {
             log.error("查询steam好友状态失败", e);
