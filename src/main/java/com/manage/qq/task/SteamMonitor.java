@@ -122,7 +122,7 @@ public class SteamMonitor {
                 if (!Objects.equals(playTime, dbPlayTime) && playTime != null && playTime > 0) {
                     String content = Math.abs((playTime - dbPlayTime) - steamRefreshMs) < steamRefreshLossMs
                             ? String.format("%s偷偷在玩%s，快去逮他！", personaName, gameName)
-                            : String.format("%s偷偷玩了%s，刚溜！", personaName, gameName);
+                            : String.format("%s偷偷玩了%s，已经溜了！", personaName, gameName);
                     QQMsgSendRequest qqMsgSendRequest = new QQMsgSendRequest();
                     qqMsgSendRequest.setContent(content);
                     qqGateway.sendMsg(qqMsgSendRequest, "634091544");
