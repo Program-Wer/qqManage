@@ -92,8 +92,8 @@ public class SteamMonitor {
         }
     }
 
-    static final long steamRefreshMs = 30 * 60 * 1000;
-    static final long steamRefreshLossMs = 60 * 1000;
+    static final long steamRefreshMinute = 30;
+    static final long steamRefreshLossMinute = 2;
 
     public void findRecentlyPlayGame(String steamId, String personaName) {
         try {
@@ -120,7 +120,7 @@ public class SteamMonitor {
                 dbPlayTime = dbPlayTime == null ? 0 : dbPlayTime;
 
                 if (!Objects.equals(playTime, dbPlayTime) && playTime != null && playTime > 0) {
-                    String content = Math.abs((playTime - dbPlayTime) - steamRefreshMs) < steamRefreshLossMs
+                    String content = Math.abs((playTime - dbPlayTime) - steamRefreshMinute) < steamRefreshLossMinute
                             ? String.format("%s偷偷在玩%s，快去逮他！", personaName, gameName)
                             : String.format("%s偷偷玩了%s，已经溜了！", personaName, gameName);
                     QQMsgSendRequest qqMsgSendRequest = new QQMsgSendRequest();
