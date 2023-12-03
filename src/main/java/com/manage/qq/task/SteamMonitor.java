@@ -94,11 +94,8 @@ public class SteamMonitor {
                 dbPlayTime = dbPlayTime == null ? 0 : dbPlayTime;
 
                 if (!Objects.equals(playTime, dbPlayTime) && playTime != null && playTime > 0) {
-                    long playMinus = playTime - dbPlayTime;
-                    long startTime = System.currentTimeMillis() - playMinus * 60 * 1000;
-                    String startDateTime = TimeUtil.formatTime(startTime, TimeUtil.DATETIME_FORMAT);
                     QQMsgSendRequest qqMsgSendRequest = new QQMsgSendRequest();
-                    qqMsgSendRequest.setContent(String.format("%s偷偷在%s的时候启动了%s，玩到现在，刚溜！", personaName, startDateTime, gameName));
+                    qqMsgSendRequest.setContent(String.format("%s偷偷玩了%s！", personaName, gameName));
                     qqGateway.sendMsg(qqMsgSendRequest, "634091544");
                 }
             }
