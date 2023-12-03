@@ -92,6 +92,9 @@ public class SteamMonitor {
         }
     }
 
+    static final long steamRefreshMs = 30 * 60 * 1000;
+    static final long steamRefreshLossMs = 60 * 1000;
+
     public void findRecentlyPlayGame(String steamId, String personaName) {
         try {
             List resList = steamGateway.getRecentlyPlayGames(steamId);
@@ -117,8 +120,11 @@ public class SteamMonitor {
                 dbPlayTime = dbPlayTime == null ? 0 : dbPlayTime;
 
                 if (!Objects.equals(playTime, dbPlayTime) && playTime != null && playTime > 0) {
+                    String content = Math.abs((playTime - dbPlayTime) - steamRefreshMs) < steamRefreshLossMs
+                            ? String.format("%s偷偷在玩%s，快去逮他！", personaName, gameName)
+                            : String.format("%s偷偷玩了%s，刚溜！", personaName, gameName);
                     QQMsgSendRequest qqMsgSendRequest = new QQMsgSendRequest();
-                    qqMsgSendRequest.setContent(String.format("%s偷偷玩了%s！", personaName, gameName));
+                    qqMsgSendRequest.setContent(content);
                     qqGateway.sendMsg(qqMsgSendRequest, "634091544");
                 }
             }
