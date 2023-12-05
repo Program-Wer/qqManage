@@ -68,7 +68,7 @@ public class SteamMonitor {
         }
     }
 
-    @Scheduled(fixedRate = 3600000)
+    @Scheduled(fixedRate = 300000)
     public void findRecentlyPlayGame() {
         try {
             List resList = steamGateway.getUsersInfo(steamIds);
@@ -120,7 +120,8 @@ public class SteamMonitor {
                 dbPlayTime = dbPlayTime == null ? 0 : dbPlayTime;
 
                 if (!Objects.equals(playTime, dbPlayTime) && playTime != null && playTime > 0) {
-                    String content = Math.abs((playTime - dbPlayTime) - steamRefreshMinute) < steamRefreshLossMinute
+                    log.info("{}", (playTime - dbPlayTime) * 111);
+                    String content = Math.abs((playTime - dbPlayTime)- steamRefreshMinute) < steamRefreshLossMinute
                             ? String.format("%s偷偷在玩%s，快去逮他！", personaName, gameName)
                             : String.format("%s偷偷玩了%s，已经溜了！", personaName, gameName);
                     QQMsgSendRequest qqMsgSendRequest = new QQMsgSendRequest();
